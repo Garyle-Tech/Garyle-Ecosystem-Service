@@ -1,6 +1,7 @@
 package ota
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -34,7 +35,7 @@ func (h *Handler) CreateOTA(c *gin.Context) {
 
 	result, err := h.otaService.Create(c.Request.Context(), &ota)
 	if err != nil {
-		if isValidationCreateOTAError(err) {
+		if isValidationCreateOrUpdateOTAError(err) {
 			response.BadRequest(c, err.Error())
 			return
 		}
@@ -46,7 +47,7 @@ func (h *Handler) CreateOTA(c *gin.Context) {
 	response.Success(c, result, "OTA created successfully")
 }
 
-func isValidationCreateOTAError(err error) bool {
+func isValidationCreateOrUpdateOTAError(err error) bool {
 	validationErrors := []string{
 		"app ID is required",
 		"version name is required",
@@ -124,8 +125,17 @@ func (h *Handler) UpdateOTA(c *gin.Context) {
 		return
 	}
 
-	ota.AppID = appID
-	if err := h.otaService.UpdateByAppID(c.Request.Context(), &ota); err != nil {
+	if err := h.otaService.UpdateByAppID(c.Request.Context(), &ota, appID); err != nil {
+		if err.Error() == fmt.Sprintf("OTA for app ID %s not found", appID) {
+			response.NotFound(c, err.Error())
+			return
+		}
+
+		if isValidationCreateOrUpdateOTAError(err) {
+			response.BadRequest(c, err.Error())
+			return
+		}
+
 		response.Server(c, err.Error())
 		return
 	}

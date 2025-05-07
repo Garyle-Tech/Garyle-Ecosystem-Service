@@ -15,7 +15,7 @@ type Service interface {
 	GetByAppID(ctx context.Context, appID string) (*otaModel.OTA, error)
 	List(ctx context.Context, limit, page int) ([]*otaModel.OTA, error)
 	Count(ctx context.Context) (int, error)
-	UpdateByAppID(ctx context.Context, ota *otaModel.OTA) error
+	UpdateByAppID(ctx context.Context, ota *otaModel.OTA, appID string) error
 	DeleteByAppID(ctx context.Context, appID string) error
 }
 
@@ -65,8 +65,8 @@ func (s *service) Count(ctx context.Context) (int, error) {
 	return s.otaRepo.Count(ctx)
 }
 
-func (s *service) UpdateByAppID(ctx context.Context, ota *otaModel.OTA) error {
-	if ota.AppID == "" {
+func (s *service) UpdateByAppID(ctx context.Context, ota *otaModel.OTA, appID string) error {
+	if appID == "" {
 		return errors.New("invalid app ID")
 	}
 
@@ -75,19 +75,16 @@ func (s *service) UpdateByAppID(ctx context.Context, ota *otaModel.OTA) error {
 	}
 
 	// Get existing OTA to check if it exists
-	existing, err := s.otaRepo.GetByAppID(ctx, ota.AppID)
+	existing, err := s.otaRepo.GetByAppID(ctx, appID)
 	if err != nil {
 		return fmt.Errorf("failed to get existing OTA: %w", err)
 	}
 
 	if existing == nil {
-		return fmt.Errorf("OTA for app ID %s not found", ota.AppID)
+		return fmt.Errorf("OTA for app ID %s not found", appID)
 	}
 
-	// Preserve ID from existing record
-	ota.ID = existing.ID
-
-	return s.otaRepo.UpdateByAppID(ctx, ota)
+	return s.otaRepo.UpdateByAppID(ctx, ota, appID)
 }
 
 func (s *service) DeleteByAppID(ctx context.Context, appID string) error {

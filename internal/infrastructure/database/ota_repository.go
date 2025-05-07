@@ -125,15 +125,16 @@ func (r *otaRepository) List(ctx context.Context, limit, page int) ([]*otaModel.
 	return otas, nil
 }
 
-func (r *otaRepository) UpdateByAppID(ctx context.Context, ota *otaModel.OTA) error {
+func (r *otaRepository) UpdateByAppID(ctx context.Context, ota *otaModel.OTA, appID string) error {
 	query := `
 		UPDATE otas
 		SET version_name = $1, 
 			version_code = $2, 
 			url = $3, 
 			release_notes = $4, 
-			updated_at = $5
-		WHERE app_id = $6
+			updated_at = $5,
+			app_id = $6
+		WHERE app_id = $7
 	`
 
 	ota.UpdatedAt = time.Now()
@@ -147,6 +148,7 @@ func (r *otaRepository) UpdateByAppID(ctx context.Context, ota *otaModel.OTA) er
 		ota.ReleaseNotes,
 		ota.UpdatedAt,
 		ota.AppID,
+		appID,
 	)
 
 	if err != nil {
