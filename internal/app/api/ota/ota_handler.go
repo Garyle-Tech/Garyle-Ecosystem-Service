@@ -1,6 +1,7 @@
 package ota
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -23,17 +24,44 @@ func NewHandler(otaService otaService.Service) *Handler {
 func (h *Handler) CreateOTA(c *gin.Context) {
 	var ota otaModel.OTA
 	if err := c.ShouldBindJSON(&ota); err != nil {
+		if err.Error() == "EOF" {
+			response.BadRequest(c, "Missing request body. Please provide a valid JSON payload.")
+			return
+		}
+
 		response.BadRequest(c, err.Error())
 		return
 	}
 
 	result, err := h.otaService.Create(c.Request.Context(), &ota)
 	if err != nil {
+		if isValidationCreateOrUpdateOTAError(err) {
+			response.BadRequest(c, err.Error())
+			return
+		}
+
 		response.Server(c, err.Error())
 		return
 	}
 
 	response.Success(c, result, "OTA created successfully")
+}
+
+func isValidationCreateOrUpdateOTAError(err error) bool {
+	validationErrors := []string{
+		"app ID is required",
+		"version name is required",
+		"version code must be a positive number",
+		"URL is required",
+		"an OTA update already exists for this app",
+	}
+
+	for _, validationErr := range validationErrors {
+		if err.Error() == validationErr {
+			return true
+		}
+	}
+	return false
 }
 
 func (h *Handler) GetOTA(c *gin.Context) {
@@ -97,8 +125,17 @@ func (h *Handler) UpdateOTA(c *gin.Context) {
 		return
 	}
 
-	ota.AppID = appID
-	if err := h.otaService.UpdateByAppID(c.Request.Context(), &ota); err != nil {
+	if err := h.otaService.UpdateByAppID(c.Request.Context(), &ota, appID); err != nil {
+		if err.Error() == fmt.Sprintf("OTA for app ID %s not found", appID) {
+			response.NotFound(c, err.Error())
+			return
+		}
+
+		if isValidationCreateOrUpdateOTAError(err) {
+			response.BadRequest(c, err.Error())
+			return
+		}
+
 		response.Server(c, err.Error())
 		return
 	}
