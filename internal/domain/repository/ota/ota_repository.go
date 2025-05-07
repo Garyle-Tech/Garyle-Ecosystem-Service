@@ -11,6 +11,6 @@ type OTARepository interface {
 	GetByAppID(ctx context.Context, appID string) (*otaModel.OTA, error)
 	List(ctx context.Context, limit, page int) ([]*otaModel.OTA, error)
 	Count(ctx context.Context) (int, error)
-	UpdateByAppID(ctx context.Context, ota *otaModel.OTA) error
+	UpdateByAppID(ctx context.Context, ota *otaModel.OTA, appID string) error
 	DeleteByAppID(ctx context.Context, appID string) error
 }
