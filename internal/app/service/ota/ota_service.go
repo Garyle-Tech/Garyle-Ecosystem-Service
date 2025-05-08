@@ -92,6 +92,16 @@ func (s *service) DeleteByAppID(ctx context.Context, appID string) error {
 		return errors.New("invalid app ID")
 	}
 
+	// check if data ota exists
+	existingOTA, err := s.otaRepo.GetByAppID(ctx, appID)
+	if err != nil {
+		return err
+	}
+
+	if existingOTA == nil {
+		return fmt.Errorf("OTA for app ID %s not found", appID)
+	}
+
 	return s.otaRepo.DeleteByAppID(ctx, appID)
 }
 

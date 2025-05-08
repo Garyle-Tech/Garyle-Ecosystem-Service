@@ -4,9 +4,11 @@ import (
 	"go.uber.org/fx"
 
 	"ecosystem.garyle/service/internal/app/module/ota"
+	productModule "ecosystem.garyle/service/internal/app/module/wms/master-data/product"
 )
 
 // Module combines all application modules
 var Module = fx.Module("app",
 	ota.Module,
+	productModule.Module,
 )

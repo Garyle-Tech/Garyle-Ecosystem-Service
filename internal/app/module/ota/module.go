@@ -8,12 +8,12 @@ import (
 
 	"ecosystem.garyle/service/internal/app/api/ota"
 	otaService "ecosystem.garyle/service/internal/app/service/ota"
-	"ecosystem.garyle/service/internal/infrastructure/database"
+	otaRepoPostgres "ecosystem.garyle/service/internal/infrastructure/database/ota"
 )
 
 var Module = fx.Module("ota",
 	fx.Provide(
-		database.NewOTARepository,
+		otaRepoPostgres.NewOTARepository,
 		otaService.NewService,
 		ota.NewHandler,
 	),
@@ -21,7 +21,7 @@ var Module = fx.Module("ota",
 
 // RegisterOTAHandlers registers OTA routes with the router group
 func RegisterOTAHandlers(db *sql.DB, router *gin.RouterGroup) {
-	repo := database.NewOTARepository(db)
+	repo := otaRepoPostgres.NewOTARepository(db)
 	service := otaService.NewService(repo)
 	handler := ota.NewHandler(service)
 
