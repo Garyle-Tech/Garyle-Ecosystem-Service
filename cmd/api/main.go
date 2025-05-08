@@ -11,6 +11,7 @@ import (
 	"ecosystem.garyle/service/internal/app/config"
 	"ecosystem.garyle/service/internal/app/module"
 	"ecosystem.garyle/service/internal/app/module/ota"
+	"ecosystem.garyle/service/internal/app/module/wms"
 	"ecosystem.garyle/service/internal/infrastructure/database"
 	"ecosystem.garyle/service/internal/infrastructure/middleware"
 	"ecosystem.garyle/service/pkg/logger"
@@ -64,7 +65,8 @@ func registerRoutes(router *gin.Engine, db *sql.DB) {
 	})
 
 	// Register feature routes
-	ota.RegisterOTAHandlers(db, apiV1)
+	ota.RegisterOTAHandler(db, apiV1)
+	wms.RegisterWMSHandler(db, apiV1)
 }
 
 // startServer starts the HTTP server
