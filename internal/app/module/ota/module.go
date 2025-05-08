@@ -19,8 +19,8 @@ var Module = fx.Module("ota",
 	),
 )
 
-// RegisterOTAHandlers registers OTA routes with the router group
-func RegisterOTAHandlers(db *sql.DB, router *gin.RouterGroup) {
+// RegisterOTAHandler registers OTA routes with the router group
+func RegisterOTAHandler(db *sql.DB, router *gin.RouterGroup) {
 	repo := otaRepoPostgres.NewOTARepository(db)
 	service := otaService.NewService(repo)
 	handler := ota.NewHandler(service)

@@ -203,7 +203,7 @@ func (h *Handler) DeleteProductByID(c *gin.Context) {
 }
 
 func (h *Handler) RegisterProductRoutes(router *gin.RouterGroup) {
-	productRoutes := router.Group("/wms/master-data/product")
+	productRoutes := router.Group("/product")
 	{
 		productRoutes.POST("", h.CreateProduct)
 		productRoutes.GET("", h.GetListProducts)

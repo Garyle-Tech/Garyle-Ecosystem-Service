@@ -19,8 +19,8 @@ var Module = fx.Module("product",
 	),
 )
 
-// RegisterProductHandlers registers product routes with the router group
-func RegisterProductHandlers(db *sql.DB, router *gin.RouterGroup) {
+// RegisterProductHandler registers product routes with the router group
+func RegisterProductHandler(db *sql.DB, router *gin.RouterGroup) {
 	repo := productRepoPostgres.NewProductRepository(db)
 	service := productService.NewProductService(repo)
 	handler := productHandler.NewProductHandler(service)
