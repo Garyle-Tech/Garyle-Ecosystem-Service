@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
 
+	customerModule "ecosystem.garyle/service/internal/app/module/wms/master-data/customer"
 	locationModule "ecosystem.garyle/service/internal/app/module/wms/master-data/location"
 	productModule "ecosystem.garyle/service/internal/app/module/wms/master-data/product"
 	supplierModule "ecosystem.garyle/service/internal/app/module/wms/master-data/supplier"
@@ -15,6 +16,7 @@ var Module = fx.Module("wms",
 	productModule.Module,
 	locationModule.Module,
 	supplierModule.Module,
+	customerModule.Module,
 )
 
 func RegisterWMSHandler(db *sql.DB, router *gin.RouterGroup) {
@@ -23,4 +25,5 @@ func RegisterWMSHandler(db *sql.DB, router *gin.RouterGroup) {
 	productModule.RegisterProductHandler(db, masterDataGroup)
 	locationModule.RegisterLocationHandler(db, masterDataGroup)
 	supplierModule.RegisterSupplierHandler(db, masterDataGroup)
+	customerModule.RegisterCustomerHandler(db, masterDataGroup)
 }

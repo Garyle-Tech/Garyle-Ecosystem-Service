@@ -8,3 +8,6 @@ migrate-down:
 # use it with "make migrate-create name=migration_name"
 migrate-create:
 	migrate create -ext sql -dir ./migrations -seq $(name) 
+
+run:
+	go run cmd/api/main.go

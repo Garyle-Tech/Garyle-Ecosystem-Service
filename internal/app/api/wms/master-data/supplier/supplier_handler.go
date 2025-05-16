@@ -21,7 +21,6 @@ func NewSupplierHandler(supplierService supplierService.SupplierService) *Suppli
 func (h *SupplierHandler) CreateSupplier(c *gin.Context) {
 	var supplier supplierModel.Supplier
 	if err := c.ShouldBindJSON(&supplier); err != nil {
-
 		// validation error when json body empty
 		if err.Error() == "EOF" {
 			response.BadRequest(c, "Missing request body. Please provide a valid JSON payload.")
@@ -81,11 +80,6 @@ func (h *SupplierHandler) GetListSupplier(c *gin.Context) {
 func (h *SupplierHandler) GetSupplierByID(c *gin.Context) {
 	id := c.Param("id")
 
-	if id == "" {
-		response.BadRequest(c, "Invalid supplier ID")
-		return
-	}
-
 	supplierId, err := strconv.Atoi(id)
 	if err != nil {
 		response.BadRequest(c, "Invalid supplier ID")
@@ -95,13 +89,12 @@ func (h *SupplierHandler) GetSupplierByID(c *gin.Context) {
 	// get supplier by id
 	supplier, err := h.supplierService.GetByID(c.Request.Context(), supplierId)
 	if err != nil {
+		if err.Error() == "supplier not found" {
+			response.NotFound(c, err.Error())
+			return
+		}
 
 		response.Server(c, err.Error())
-		return
-	}
-
-	if supplier == nil {
-		response.NotFound(c, "Supplier not found")
 		return
 	}
 
@@ -111,11 +104,6 @@ func (h *SupplierHandler) GetSupplierByID(c *gin.Context) {
 // update supplier by id
 func (h *SupplierHandler) UpdateSupplierByID(c *gin.Context) {
 	id := c.Param("id")
-
-	if id == "" {
-		response.BadRequest(c, "Invalid supplier ID")
-		return
-	}
 
 	supplierId, err := strconv.Atoi(id)
 	if err != nil {
@@ -158,11 +146,6 @@ func (h *SupplierHandler) UpdateSupplierByID(c *gin.Context) {
 // delete supplier by id
 func (h *SupplierHandler) DeleteSupplierByID(c *gin.Context) {
 	id := c.Param("id")
-
-	if id == "" {
-		response.BadRequest(c, "Invalid supplier ID")
-		return
-	}
 
 	supplierId, err := strconv.Atoi(id)
 	if err != nil {

@@ -27,7 +27,7 @@ func NewSupplierService(supplierRepo supplierRepo.SupplierRepository) SupplierSe
 
 // Create implements SupplierService.
 func (s *supplierService) Create(ctx context.Context, supplier *supplierModel.Supplier) (*supplierModel.Supplier, error) {
-	// validate supplier
+	// validate supplier json input
 	err := validateSupplier(supplier)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,17 @@ func (s *supplierService) Create(ctx context.Context, supplier *supplierModel.Su
 
 // List implements SupplierService.
 func (s *supplierService) List(ctx context.Context, limit int, page int) ([]*supplierModel.Supplier, error) {
-	return s.supplierRepo.List(ctx, limit, page)
+	suppliers, err := s.supplierRepo.List(ctx, limit, page)
+	if err != nil {
+		return nil, err
+	}
+
+	// jika tidak data null, maka tampilkan list kosong dengan status tetap 200
+	if len(suppliers) == 0 || suppliers == nil {
+		return []*supplierModel.Supplier{}, nil
+	}
+
+	return suppliers, nil
 }
 
 // Count implements SupplierService.
@@ -68,7 +78,16 @@ func (s *supplierService) GetByID(ctx context.Context, id int) (*supplierModel.S
 		return nil, errors.New("invalid supplier id")
 	}
 
-	return s.supplierRepo.GetByID(ctx, id)
+	supplier, err := s.supplierRepo.GetByID(ctx, id)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return nil, errors.New("supplier not found")
+		}
+
+		return nil, err
+	}
+
+	return supplier, nil
 }
 
 // UpdateByID implements SupplierService.
