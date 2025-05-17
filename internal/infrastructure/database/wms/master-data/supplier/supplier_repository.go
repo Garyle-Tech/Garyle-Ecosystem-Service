@@ -78,10 +78,6 @@ func (s *supplierRepository) List(ctx context.Context, limit int, page int) ([]*
 		return nil, err
 	}
 
-	if len(suppliers) == 0 || suppliers == nil {
-		return []*supplier.Supplier{}, nil
-	}
-
 	return suppliers, nil
 }
 
@@ -111,9 +107,6 @@ func (s *supplierRepository) GetByID(ctx context.Context, id int) (*supplier.Sup
 	var supplier supplier.Supplier
 	err := s.db.QueryRowContext(ctx, query, id).Scan(&supplier.ID, &supplier.Name, &supplier.Address, &supplier.Contact, &supplier.CreatedAt, &supplier.UpdatedAt, &supplier.DeletedAt)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
 		return nil, err
 	}
 
@@ -125,7 +118,7 @@ func (s *supplierRepository) UpdateByID(ctx context.Context, supplier *supplier.
 	query := `
 		UPDATE suppliers
 		SET name = $1, address = $2, contact = $3, updated_at = $4
-		WHERE id = $5
+		WHERE id = $5 AND deleted_at IS NULL
 	`
 
 	_, err := s.db.ExecContext(ctx, query, supplier.Name, supplier.Address, supplier.Contact, supplier.UpdatedAt, id)
@@ -140,7 +133,7 @@ func (s *supplierRepository) UpdateByID(ctx context.Context, supplier *supplier.
 func (s *supplierRepository) DeleteByID(ctx context.Context, id int) error {
 	query := `
 		UPDATE suppliers
-		SET deleted_at = $1
+		SET deleted_at = $1, updated_at = $1
 		WHERE id = $2 AND deleted_at IS NULL
 	`
 
